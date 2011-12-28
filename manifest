@@ -1,0 +1,18 @@
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 1.0
+apiversion: 2
+description: Gives you access to storing simple key-value pairs in iCloud.
+author: Matthew Apperson
+license: Appcelerator Commercial License
+copyright: Copyright (c) 2010-2011 by Appcelerator, Inc.
+
+
+# these should not be edited
+name: icloud
+moduleid: ti.icloud
+guid: 08f54473-ee58-40da-bc00-154cfdc1ac2c
+platform: iphone
+minsdk: 1.8.0.1
