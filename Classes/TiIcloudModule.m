@@ -13,28 +13,6 @@
 
 #pragma mark Internal
 
--(void)storeUpdated:(NSNotification*)notification
-{
-    NSLog(@"[INFO] iCloud Change Detected; firing event...");
-    NSDictionary *userInfo = [notification userInfo];
-    NSNumber* reason = [userInfo objectForKey:NSUbiquitousKeyValueStoreChangeReasonKey];
-    NSArray* keys = [userInfo objectForKey:NSUbiquitousKeyValueStoreChangedKeysKey];
-    switch ([reason integerValue]) {
-        case NSUbiquitousKeyValueStoreServerChange:
-            [self fireEvent:@"externalChange" withObject:[NSDictionary dictionaryWithObject:keys forKey:@"keys"]];
-            break;
-        case NSUbiquitousKeyValueStoreInitialSyncChange:
-            [self fireEvent:@"needsInitialSync" withObject:[NSDictionary dictionaryWithObject:keys forKey:@"keys"]];
-            break;
-        case NSUbiquitousKeyValueStoreQuotaViolationChange:
-            [self fireEvent:@"quotaViolated" withObject:[NSDictionary dictionaryWithObject:keys forKey:@"keys"]];
-            break;
-        default:
-            NSLog(@"[ERROR] Unknown change reason sent from iCloud: %d!", [reason intValue]);
-            break;
-    }
-}
-
 // this is generated for your module, please do not change it
 -(id)moduleGUID
 {
@@ -57,19 +35,55 @@
 #pragma mark -
 #pragma mark Public APIs
 
-#pragma mark Disk Synchronization
+#pragma mark Events
 
--(void)_listenerAdded:(NSString *)type count:(int)count
+-(void)storeUpdated:(NSNotification*)notification
 {
-	if (!listenerAdded)
-	{
-		[[NSNotificationCenter defaultCenter] addObserver:self
+    NSLog(@"[INFO] iCloud Change Detected; firing event...");
+    NSDictionary* userInfo = [notification userInfo];
+    NSNumber* reason = [userInfo objectForKey:NSUbiquitousKeyValueStoreChangeReasonKey];
+    NSArray* keys = [userInfo objectForKey:NSUbiquitousKeyValueStoreChangedKeysKey];
+    switch ([reason integerValue])
+    {
+        case NSUbiquitousKeyValueStoreServerChange:
+            [self fireEvent:@"externalChange" withObject:[NSDictionary dictionaryWithObject:keys forKey:@"keys"]];
+            break;
+        case NSUbiquitousKeyValueStoreInitialSyncChange:
+            [self fireEvent:@"needsInitialSync" withObject:[NSDictionary dictionaryWithObject:keys forKey:@"keys"]];
+            break;
+        case NSUbiquitousKeyValueStoreQuotaViolationChange:
+            [self fireEvent:@"quotaViolated" withObject:[NSDictionary dictionaryWithObject:keys forKey:@"keys"]];
+            break;
+        default:
+            NSLog(@"[ERROR] Unknown change reason sent from iCloud: %d!", [reason intValue]);
+            break;
+    }
+}
+
+-(void)_listenerAdded:(NSString*)type count:(int)count
+{
+    listenerCount++;
+    if (listenerCount == 1)
+    {
+        [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(storeUpdated:)
                                                      name:NSUbiquitousKeyValueStoreDidChangeExternallyNotification
                                                    object:[NSUbiquitousKeyValueStore defaultStore]];
-        listenerAdded = YES;
-	}
+    }
 }
+
+-(void)_listenerRemoved:(NSString*)type count:(int)count
+{
+    listenerCount--;
+    if (listenerCount == 0)
+    {
+        [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                        name:NSUbiquitousKeyValueStoreDidChangeExternallyNotification
+                                                      object:[NSUbiquitousKeyValueStore defaultStore]];
+    }
+}
+
+#pragma mark Disk Synchronization
 
 -(id)sync:(id)args
 {
@@ -83,8 +97,8 @@
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     ENSURE_TYPE([args objectAtIndex:1], NSString);
     
-    NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
-    NSString *value = [TiUtils stringValue:[args objectAtIndex:1]];
+    NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
+    NSString* value = [TiUtils stringValue:[args objectAtIndex:1]];
     
     [[NSUbiquitousKeyValueStore defaultStore] setString:value forKey:key];
 }
@@ -94,7 +108,7 @@
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     ENSURE_TYPE([args objectAtIndex:1], NSNumber);
     
-    NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
+    NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     bool value = [TiUtils boolValue:[args objectAtIndex:1]];
     
     [[NSUbiquitousKeyValueStore defaultStore] setBool:value forKey:key];
@@ -105,8 +119,8 @@
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     ENSURE_TYPE([args objectAtIndex:1], NSDictionary);
     
-    NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
-    NSDictionary *value = [args objectAtIndex:1];
+    NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
+    NSDictionary* value = [args objectAtIndex:1];
     
     [[NSUbiquitousKeyValueStore defaultStore] setDictionary:value forKey:key];
 }
@@ -117,8 +131,8 @@
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     ENSURE_TYPE([args objectAtIndex:1], NSArray);
     
-    NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
-    NSArray *value = [args objectAtIndex:1];
+    NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
+    NSArray* value = [args objectAtIndex:1];
     
     [[NSUbiquitousKeyValueStore defaultStore] setArray:value forKey:key];
 }
@@ -128,7 +142,7 @@
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     ENSURE_TYPE([args objectAtIndex:1], NSNumber);
     
-    NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
+    NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     // NOTE: We coerce the int to a double...
     double value = [TiUtils doubleValue:[args objectAtIndex:1]];
     // so that we can still store it in iCloud! (There is no "setInt" method yet.)
@@ -140,7 +154,7 @@
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     ENSURE_TYPE([args objectAtIndex:1], NSNumber);
     
-    NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
+    NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     double value = [TiUtils doubleValue:[args objectAtIndex:1]];
     
     [[NSUbiquitousKeyValueStore defaultStore] setDouble:value forKey:key];
@@ -150,7 +164,7 @@
 {
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     
-    NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
+    NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     id value = [args objectAtIndex:1];
     
     [[NSUbiquitousKeyValueStore defaultStore] setObject:value forKey:key];
@@ -161,7 +175,7 @@
 -(id)getString:(id)args
 {
     ENSURE_TYPE([args objectAtIndex:0], NSString);
-    NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
+    NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     
     return [[NSUbiquitousKeyValueStore defaultStore] stringForKey:key];
 }
@@ -169,7 +183,7 @@
 -(id)getBool:(id)args
 {
     ENSURE_TYPE([args objectAtIndex:0], NSString);
-    NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
+    NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     
     return NUMBOOL([[NSUbiquitousKeyValueStore defaultStore] boolForKey:key]);
 }
@@ -177,7 +191,7 @@
 -(id)getDictonary:(id)args
 {
     ENSURE_TYPE([args objectAtIndex:0], NSString);
-    NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
+    NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     
     return [[NSUbiquitousKeyValueStore defaultStore] dictionaryForKey:key];
 }
@@ -185,7 +199,7 @@
 -(id)getList:(id)args
 {
     ENSURE_TYPE([args objectAtIndex:0], NSString);
-    NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
+    NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     
     return [[NSUbiquitousKeyValueStore defaultStore] arrayForKey:key];
 }
@@ -193,7 +207,7 @@
 -(id)getInt:(id)args
 {
     ENSURE_TYPE([args objectAtIndex:0], NSString);
-    NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
+    NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     // NOTE: iCloud doesn't have a "intForKey" method, so we instead grab it as a double.
     return NUMINT([[NSUbiquitousKeyValueStore defaultStore] doubleForKey:key]);
 }
@@ -201,7 +215,7 @@
 -(id)getDouble:(id)args
 {
     ENSURE_TYPE([args objectAtIndex:0], NSString);
-    NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
+    NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     
     return NUMDOUBLE([[NSUbiquitousKeyValueStore defaultStore] doubleForKey:key]);
 }
@@ -209,7 +223,7 @@
 -(id)getObject:(id)args
 {
     ENSURE_TYPE([args objectAtIndex:0], NSString);
-    NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
+    NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     
     return [[NSUbiquitousKeyValueStore defaultStore] objectForKey:key];
 }
@@ -224,7 +238,7 @@
 -(void)remove:(id)args
 {
     ENSURE_TYPE([args objectAtIndex:0], NSString);
-    NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
+    NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     
     [[NSUbiquitousKeyValueStore defaultStore] removeObjectForKey:key];
 }

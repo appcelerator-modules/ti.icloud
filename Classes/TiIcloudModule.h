@@ -8,7 +8,7 @@
 
 @interface TiIcloudModule : TiModule 
 {
-    bool listenerAdded;
+    int listenerCount;
 }
 
 @end
