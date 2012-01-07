@@ -6,6 +6,10 @@
  */
 #import "TiModule.h"
 
+#ifndef __IPHONE_5_0
+#define __IPHONE_5_0     50000
+#endif
+
 @interface TiIcloudModule : TiModule 
 {
     int listenerCount;
