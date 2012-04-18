@@ -33,7 +33,29 @@
 }
 
 #pragma mark -
+#pragma mark Utility
+-(id)getStore
+{
+    Class kvsClass = NSClassFromString(@"NSUbiquitousKeyValueStore");
+    if (kvsClass) {
+        return [kvsClass defaultStore];
+    }
+    NSLog(@"[ERROR] iCloud is not supported on this device!");
+    return nil;
+}
+
+#pragma mark -
 #pragma mark Public APIs
+
+-(bool)isSupported
+{
+    return [self getStore] != nil;
+}
+
+-(id)isSupported:(id)args
+{
+    return NUMBOOL([self isSupported]);
+}
 
 #pragma mark Events
 
@@ -66,12 +88,12 @@
 {
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
     listenerCount++;
-    if (listenerCount == 1)
+    if (listenerCount == 1 && [self isSupported])
     {
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(storeUpdated:)
                                                      name:NSUbiquitousKeyValueStoreDidChangeExternallyNotification
-                                                   object:[NSUbiquitousKeyValueStore defaultStore]];
+                                                   object:[self getStore]];
     }
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
@@ -82,11 +104,11 @@
 {
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
     listenerCount--;
-    if (listenerCount == 0)
+    if (listenerCount == 0 && [self isSupported])
     {
         [[NSNotificationCenter defaultCenter] removeObserver:self
                                                         name:NSUbiquitousKeyValueStoreDidChangeExternallyNotification
-                                                      object:[NSUbiquitousKeyValueStore defaultStore]];
+                                                      object:[self getStore]];
     }
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
@@ -97,8 +119,11 @@
 
 -(id)sync:(id)args
 {
+    if (![self isSupported]) {
+        return NUMBOOL(NO);
+    }
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    return NUMBOOL([[NSUbiquitousKeyValueStore defaultStore] synchronize]);
+    return NUMBOOL([[self getStore] synchronize]);
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
     return NUMBOOL(NO);
@@ -109,6 +134,10 @@
 
 -(void)setString:(id)args
 {
+    if (![self isSupported]) {
+        return;
+    }
+    
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     ENSURE_TYPE([args objectAtIndex:1], NSString);
     
@@ -116,7 +145,7 @@
     NSString* value = [TiUtils stringValue:[args objectAtIndex:1]];
     
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    [[NSUbiquitousKeyValueStore defaultStore] setString:value forKey:key];
+    [[self getStore] setString:value forKey:key];
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
 #endif
@@ -124,6 +153,9 @@
 
 -(void)setBool:(id)args
 {
+    if (![self isSupported]) {
+        return;
+    }
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     ENSURE_TYPE([args objectAtIndex:1], NSNumber);
     
@@ -131,7 +163,7 @@
     bool value = [TiUtils boolValue:[args objectAtIndex:1]];
     
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    [[NSUbiquitousKeyValueStore defaultStore] setBool:value forKey:key];
+    [[self getStore] setBool:value forKey:key];
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
 #endif
@@ -139,6 +171,9 @@
 
 -(void)setDictonary:(id)args
 {
+    if (![self isSupported]) {
+        return;
+    }
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     ENSURE_TYPE([args objectAtIndex:1], NSDictionary);
     
@@ -146,7 +181,7 @@
     NSDictionary* value = [args objectAtIndex:1];
     
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    [[NSUbiquitousKeyValueStore defaultStore] setDictionary:value forKey:key];
+    [[self getStore] setDictionary:value forKey:key];
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
 #endif
@@ -155,6 +190,9 @@
 
 -(void)setList:(id)args
 {
+    if (![self isSupported]) {
+        return;
+    }
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     ENSURE_TYPE([args objectAtIndex:1], NSArray);
     
@@ -162,7 +200,7 @@
     NSArray* value = [args objectAtIndex:1];
     
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    [[NSUbiquitousKeyValueStore defaultStore] setArray:value forKey:key];
+    [[self getStore] setArray:value forKey:key];
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
 #endif
@@ -170,6 +208,9 @@
 
 -(void)setInt:(id)args
 {
+    if (![self isSupported]) {
+        return;
+    }
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     ENSURE_TYPE([args objectAtIndex:1], NSNumber);
     
@@ -179,7 +220,7 @@
     // so that we can still store it in iCloud! (There is no "setInt" method yet.)
     
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    [[NSUbiquitousKeyValueStore defaultStore] setDouble:value forKey:key];
+    [[self getStore] setDouble:value forKey:key];
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
 #endif
@@ -187,6 +228,9 @@
 
 -(void)setDouble:(id)args
 {
+    if (![self isSupported]) {
+        return;
+    }
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     ENSURE_TYPE([args objectAtIndex:1], NSNumber);
     
@@ -194,7 +238,7 @@
     double value = [TiUtils doubleValue:[args objectAtIndex:1]];
     
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    [[NSUbiquitousKeyValueStore defaultStore] setDouble:value forKey:key];
+    [[self getStore] setDouble:value forKey:key];
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
 #endif
@@ -202,13 +246,16 @@
 
 -(void)setObject:(id)args
 {
+    if (![self isSupported]) {
+        return;
+    }
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     
     NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     id value = [args objectAtIndex:1];
     
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    [[NSUbiquitousKeyValueStore defaultStore] setObject:value forKey:key];
+    [[self getStore] setObject:value forKey:key];
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
 #endif
@@ -218,11 +265,14 @@
 
 -(id)getString:(id)args
 {
+    if (![self isSupported]) {
+        return NUMBOOL(NO);
+    }
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    return [[NSUbiquitousKeyValueStore defaultStore] stringForKey:key];
+    return [[self getStore] stringForKey:key];
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
     return nil;
@@ -231,11 +281,14 @@
 
 -(id)getBool:(id)args
 {
+    if (![self isSupported]) {
+        return NUMBOOL(NO);
+    }
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    return NUMBOOL([[NSUbiquitousKeyValueStore defaultStore] boolForKey:key]);
+    return NUMBOOL([[self getStore] boolForKey:key]);
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
     return nil;
@@ -244,11 +297,14 @@
 
 -(id)getDictonary:(id)args
 {
+    if (![self isSupported]) {
+        return NUMBOOL(NO);
+    }
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    return [[NSUbiquitousKeyValueStore defaultStore] dictionaryForKey:key];
+    return [[self getStore] dictionaryForKey:key];
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
     return nil;
@@ -257,11 +313,14 @@
 
 -(id)getList:(id)args
 {
+    if (![self isSupported]) {
+        return NUMBOOL(NO);
+    }
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    return [[NSUbiquitousKeyValueStore defaultStore] arrayForKey:key];
+    return [[self getStore] arrayForKey:key];
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
     return nil;
@@ -270,12 +329,15 @@
 
 -(id)getInt:(id)args
 {
+    if (![self isSupported]) {
+        return NUMBOOL(NO);
+    }
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     // NOTE: iCloud doesn't have a "intForKey" method, so we instead grab it as a double.
     
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    return NUMINT([[NSUbiquitousKeyValueStore defaultStore] doubleForKey:key]);
+    return NUMINT([[self getStore] doubleForKey:key]);
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
     return nil;
@@ -284,11 +346,14 @@
 
 -(id)getDouble:(id)args
 {
+    if (![self isSupported]) {
+        return NUMBOOL(NO);
+    }
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    return NUMDOUBLE([[NSUbiquitousKeyValueStore defaultStore] doubleForKey:key]);
+    return NUMDOUBLE([[self getStore] doubleForKey:key]);
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
     return nil;
@@ -297,11 +362,14 @@
 
 -(id)getObject:(id)args
 {
+    if (![self isSupported]) {
+        return NUMBOOL(NO);
+    }
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    return [[NSUbiquitousKeyValueStore defaultStore] objectForKey:key];
+    return [[self getStore] objectForKey:key];
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
     return nil;
@@ -310,8 +378,11 @@
 
 -(id)getAll:(id)args
 {
+    if (![self isSupported]) {
+        return NUMBOOL(NO);
+    }
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    return [[NSUbiquitousKeyValueStore defaultStore] dictionaryRepresentation];
+    return [[self getStore] dictionaryRepresentation];
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
     return nil;
@@ -322,11 +393,14 @@
 
 -(void)remove:(id)args
 {
+    if (![self isSupported]) {
+        return;
+    }
     ENSURE_TYPE([args objectAtIndex:0], NSString);
     NSString* key = [TiUtils stringValue:[args objectAtIndex:0]];
     
 #if  __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_5_0
-    [[NSUbiquitousKeyValueStore defaultStore] removeObjectForKey:key];
+    [[self getStore] removeObjectForKey:key];
 #else
     NSLog(@"[ERROR] iCloud module compiled without support for iOS 5.0! Nothing will work unless you recompile the module!");
 #endif

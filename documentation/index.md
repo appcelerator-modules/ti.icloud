@@ -31,6 +31,9 @@ To access this module from JavaScript, you would do the following:
 
 ## Methods
 
+### bool isSupported()
+Returns whether or not the current device can support iCloud (iOS 5 and higher).
+
 ### bool sync()
 Forces your recent property changes to be saved to disk. Calling this method is optional, and it does not influence
 when Apple chooses to synchronize your changes with their servers and other iOS devices.
