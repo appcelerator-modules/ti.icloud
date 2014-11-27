@@ -15,4 +15,4 @@ name: icloud
 moduleid: ti.icloud
 guid: 08f54473-ee58-40da-bc00-154cfdc1ac2c
 platform: iphone
-minsdk: 1.8.0.1
+minsdk: 2.1.3.GA
