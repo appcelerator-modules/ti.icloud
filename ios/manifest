@@ -3,8 +3,7 @@
 # during compilation, packaging, distribution, etc.
 #
 version: 1.1.0
-apiversion: 2
-architectures: armeabi armeabi-v7a x86
+architectures: armv7 i386 x86_64 arm64
 description: Gives you access to storing simple key-value pairs in iCloud.
 author: Matthew Apperson
 license: Appcelerator Commercial License
@@ -16,4 +15,4 @@ name: icloud
 moduleid: ti.icloud
 guid: 08f54473-ee58-40da-bc00-154cfdc1ac2c
 platform: iphone
-minsdk: 3.4.1
+minsdk: 3.4.1.GA
