@@ -1,6 +1,6 @@
 /**
- * Eyncrypted Database
- * Copyright (c) 2017-Present by Appcelerator, Inc.
+ * Ti.iCloud
+ * Copyright (c) 2017-Present by Axway Appcelerator
  * All Rights Reserved.
  */
 
