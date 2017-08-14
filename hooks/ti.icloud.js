@@ -11,7 +11,7 @@ exports.cliVersion = '>=3.2';
 exports.init = init;
 
 /**
- * main entry point for our plugin which looks for the platform specific
+ * Main entry point for our plugin which looks for the platform specific
  * plugin to invoke
  */
 function init(logger, config, cli, appc) {
@@ -19,6 +19,7 @@ function init(logger, config, cli, appc) {
 		pre: function(data) {
 			logger.info('Injecting iCloud system-capabilities ...');
 
+			// Dig through the .pbxproj data structure
 			var iCloudIdentifier = 'com.apple.iCloud';
 			var hash = data.args[0].hash;
 			var objects = hash.project.objects;
@@ -26,15 +27,17 @@ function init(logger, config, cli, appc) {
 			var projectObject = objects[rootObject];
 			var attributes = projectObject.attributes['TargetAttributes'];
 			var capabilities = attributes[0]['SystemCapabilities'];
-						
-			for (var prop in capabilities) {
-				if (prop == iCloudIdentifier && capabilities[prop]['enabled'] == 0) {
+
+			// Loop through existing system-capabilities
+			for (var capability in capabilities) {
+				if (capability == iCloudIdentifier && capabilities[capability]['enabled'] == 0) {
 					logger.error('iCloud inside capabilities but disabled Skipping ...!');
 					return;
 				}
 			}
 
-			capabilities[] = { enabled: 1 };
+			// Enabled the com.apple.iCloud capability
+			capabilities[iCloudIdentifier] = { enabled: 1 };
 
 			// Re-assign the updated system capabilities
 			data.args[0].hash.project.objects[rootObject].attributes['TargetAttributes'][0]['SystemCapabilities'] = capabilities;
