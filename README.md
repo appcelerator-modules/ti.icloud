@@ -124,7 +124,7 @@ See `example/app.js`.
 Matthew Apperson, Hans Knöchel
 
 ## Module History
-View the [change log](changelog.html) for this module.
+View the [change log](./documentation/changelog.md) for this module.
 
 ## Feedback and Support
 
