@@ -23,17 +23,15 @@
   return @"ti.icloud";
 }
 
-#pragma mark -
 #pragma mark Utility
-- (NSUbiquitousKeyValueStore *)getStore
+- (NSUbiquitousKeyValueStore *)keyValueStore
 {
   return [NSUbiquitousKeyValueStore defaultStore];
 }
 
-#pragma mark -
 #pragma mark Public APIs
 
-- (id)isSupported:(id)args
+- (NSNumber *)isSupported:(id)args
 {
   DEPRECATED_REMOVED(@"iCloud.isSupported()", @"2.0.0", @"2.0.0. iCloud is always supported in devices running iOS 5 and later. Since Titanium targets a higher minimum SDK version, this method becomes obsolete these days");
   return NUMBOOL(YES);
@@ -61,7 +59,7 @@
     [self fireEvent:@"accountChange" withObject:[NSDictionary dictionaryWithObject:keys forKey:@"keys"]];
     break;
   default:
-    NSLog(@"[ERROR] Unknown change reason sent from iCloud: %d!", [reason intValue]);
+    NSLog(@"[ERROR] Unknown change reason sent from iCloud: %d!", [reason integerValue]);
     break;
   }
 }
@@ -73,7 +71,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(storeUpdated:)
                                                  name:NSUbiquitousKeyValueStoreDidChangeExternallyNotification
-                                               object:[self getStore]];
+                                               object:[self keyValueStore]];
   }
 }
 
@@ -83,20 +81,20 @@
   if (listenerCount == 0) {
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:NSUbiquitousKeyValueStoreDidChangeExternallyNotification
-                                                  object:[self getStore]];
+                                                  object:[self keyValueStore]];
   }
 }
 
 #pragma mark Disk Synchronization
 
-- (id)sync:(id)args
+- (NSNumber *)sync:(id)unused
 {
-  return NUMBOOL([[self getStore] synchronize]);
+  return NUMBOOL([[self keyValueStore] synchronize]);
 }
 
 #pragma mark Data Setters
 
-- (void)setString:(id)args
+- (void)setString:(NSArray *)args
 {
   ENSURE_TYPE([args objectAtIndex:0], NSString);
   ENSURE_TYPE([args objectAtIndex:1], NSString);
@@ -104,10 +102,10 @@
   NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
   NSString *value = [TiUtils stringValue:[args objectAtIndex:1]];
 
-  [[self getStore] setString:value forKey:key];
+  [[self keyValueStore] setString:value forKey:key];
 }
 
-- (void)setBool:(id)args
+- (void)setBool:(NSArray *)args
 {
   ENSURE_TYPE([args objectAtIndex:0], NSString);
   ENSURE_TYPE([args objectAtIndex:1], NSNumber);
@@ -115,10 +113,10 @@
   NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
   BOOL value = [TiUtils boolValue:[args objectAtIndex:1]];
 
-  [[self getStore] setBool:value forKey:key];
+  [[self keyValueStore] setBool:value forKey:key];
 }
 
-- (void)setDictonary:(id)args
+- (void)setDictonary:(NSArray *)args
 {
   ENSURE_TYPE([args objectAtIndex:0], NSString);
   ENSURE_TYPE([args objectAtIndex:1], NSDictionary);
@@ -126,10 +124,10 @@
   NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
   NSDictionary *value = [args objectAtIndex:1];
 
-  [[self getStore] setDictionary:value forKey:key];
+  [[self keyValueStore] setDictionary:value forKey:key];
 }
 
-- (void)setList:(id)args
+- (void)setList:(NSArray *)args
 {
   ENSURE_TYPE([args objectAtIndex:0], NSString);
   ENSURE_TYPE([args objectAtIndex:1], NSArray);
@@ -137,10 +135,10 @@
   NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
   NSArray *value = [args objectAtIndex:1];
 
-  [[self getStore] setArray:value forKey:key];
+  [[self keyValueStore] setArray:value forKey:key];
 }
 
-- (void)setInt:(id)args
+- (void)setInt:(NSArray *)args
 {
   ENSURE_TYPE([args objectAtIndex:0], NSString);
   ENSURE_TYPE([args objectAtIndex:1], NSNumber);
@@ -150,10 +148,10 @@
   double value = [TiUtils doubleValue:[args objectAtIndex:1]];
   // so that we can still store it in iCloud! (There is no "setInt" method yet.)
 
-  [[self getStore] setDouble:value forKey:key];
+  [[self keyValueStore] setDouble:value forKey:key];
 }
 
-- (void)setDouble:(id)args
+- (void)setDouble:(NSArray *)args
 {
   ENSURE_TYPE([args objectAtIndex:0], NSString);
   ENSURE_TYPE([args objectAtIndex:1], NSNumber);
@@ -161,91 +159,91 @@
   NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
   double value = [TiUtils doubleValue:[args objectAtIndex:1]];
 
-  [[self getStore] setDouble:value forKey:key];
+  [[self keyValueStore] setDouble:value forKey:key];
 }
 
-- (void)setObject:(id)args
+- (void)setObject:(NSArray *)args
 {
   ENSURE_TYPE([args objectAtIndex:0], NSString);
 
   NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
   id value = [args objectAtIndex:1];
 
-  [[self getStore] setObject:value forKey:key];
+  [[self keyValueStore] setObject:value forKey:key];
 }
 
 #pragma mark Data Getters
 
-- (id)getString:(id)args
+- (NSString *)getString:(NSArray *)args
 {
   ENSURE_TYPE([args objectAtIndex:0], NSString);
   NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
 
-  return [[self getStore] stringForKey:key];
+  return [[self keyValueStore] stringForKey:key];
 }
 
-- (id)getBool:(id)args
+- (NSNumber *)getBool:(NSArray *)args
 {
   ENSURE_TYPE([args objectAtIndex:0], NSString);
   NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
 
-  return NUMBOOL([[self getStore] boolForKey:key]);
+  return NUMBOOL([[self keyValueStore] boolForKey:key]);
 }
 
-- (id)getDictonary:(id)args
+- (NSDictionary *)getDictonary:(NSArray *)args
 {
   ENSURE_TYPE([args objectAtIndex:0], NSString);
   NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
 
-  return [[self getStore] dictionaryForKey:key];
+  return [[self keyValueStore] dictionaryForKey:key];
 }
 
-- (id)getList:(id)args
+- (NSArray *)getList:(NSArray *)args
 {
   ENSURE_TYPE([args objectAtIndex:0], NSString);
   NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
 
-  return [[self getStore] arrayForKey:key];
+  return [[self keyValueStore] arrayForKey:key];
 }
 
-- (id)getInt:(id)args
+- (NSNumber *)getInt:(NSArray *)args
 {
   ENSURE_TYPE([args objectAtIndex:0], NSString);
   NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
   // NOTE: iCloud doesn't have a "intForKey" method, so we instead grab it as a double.
 
-  return NUMINT([[self getStore] doubleForKey:key]);
+  return NUMINT([[self keyValueStore] doubleForKey:key]);
 }
 
-- (id)getDouble:(id)args
+- (NSNumber *)getDouble:(NSArray *)args
 {
   ENSURE_TYPE([args objectAtIndex:0], NSString);
   NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
 
-  return NUMDOUBLE([[self getStore] doubleForKey:key]);
+  return NUMDOUBLE([[self keyValueStore] doubleForKey:key]);
 }
 
-- (id)getObject:(id)args
+- (id)getObject:(NSArray *)args
 {
   ENSURE_TYPE([args objectAtIndex:0], NSString);
   NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
 
-  return [[self getStore] objectForKey:key];
+  return [[self keyValueStore] objectForKey:key];
 }
 
-- (id)getAll:(id)args
+- (NSDictionary *)getAll:(NSArray *)args
 {
-  return [[self getStore] dictionaryRepresentation];
+  return [[self keyValueStore] dictionaryRepresentation];
 }
 
 #pragma mark Data Removers
 
-- (void)remove:(id)args
+- (void)remove:(NSArray *)args
 {
   ENSURE_TYPE([args objectAtIndex:0], NSString);
   NSString *key = [TiUtils stringValue:[args objectAtIndex:0]];
 
-  [[self getStore] removeObjectForKey:key];
+  [[self keyValueStore] removeObjectForKey:key];
 }
 
 @end
