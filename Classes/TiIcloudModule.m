@@ -57,6 +57,9 @@
   case NSUbiquitousKeyValueStoreQuotaViolationChange:
     [self fireEvent:@"quotaViolated" withObject:[NSDictionary dictionaryWithObject:keys forKey:@"keys"]];
     break;
+  case NSUbiquitousKeyValueStoreAccountChange:
+    [self fireEvent:@"accountChange" withObject:[NSDictionary dictionaryWithObject:keys forKey:@"keys"]];
+    break;
   default:
     NSLog(@"[ERROR] Unknown change reason sent from iCloud: %d!", [reason intValue]);
     break;

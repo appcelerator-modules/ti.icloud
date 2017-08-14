@@ -39,6 +39,13 @@ if (Ti.Platform.model == 'iPhone Simulator' || Ti.Platform.model == 'Simulator')
     text.value = iCloud.getString('savedTextField');
   });
 
+  // When an iCloud account has changed. 
+  iCloud.addEventListener('accountChange', function(evt) {
+    alert('iCloud Account change detected!');
+    Ti.API.info(evt.keys);
+    text.value = iCloud.getString('savedTextField');
+  });
+
   // When the user first installs the app, or updates their iCloud account, this event may fire -- it means iCloud hasn't
   // synchronized yet, so any changes we make will be discarded. This shouldn't last long, or be encountered frequently.
   iCloud.addEventListener('needsInitialSync', function(evt) {

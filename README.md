@@ -31,56 +31,56 @@ var iCloud = require('ti.icloud');
 
 ## Methods
 
-### bool sync()
+### `bool sync()`
 Forces your recent property changes to be saved to disk. Calling this method is optional, and it does not influence
 when Apple chooses to synchronize your changes with their servers and other iOS devices.
 
-### void setString(string key, string value)
+### `void setString(string key, string value)`
 Stores a string.
 
-### void setBool(string key, bool value)
+### `void setBool(string key, bool value)`
 Stores a boolean.
 
-### void setDictionary(string key, dictionary value)
+### `void setDictionary(string key, dictionary value)`
 Stores a dictionary of any serializable values.
 
-### void setList(string key, object[] value)
+### `void setList(string key, object[] value)`
 Stores an array of serializable values.
 
-### void setInt(string key, int value)
+### `void setInt(string key, int value)`
 Stores an integer.
 
-### void setDouble(string key, double value)
+### `void setDouble(string key, double value)`
 Stores a double.
 
-### void setObject(string key, object value)
+### `void setObject(string key, object value)`
 Stores a serializable object.
 
-### string getString(string key)
+### `string getString(string key)`
 Retrieves a previously stored string.
 
-### bool getBool(string key)
+### `bool getBool(string key)`
 Retrieves a previously stored boolean.
 
-### dictionary getDictionary(string key)
+### `dictionary getDictionary(string key)`
 Retrieves a previously stored dictionary.
 
-### object[] getList(string key)
+### `object[] getList(string key)`
 Retrieves a previously stored array.
 
-### int getInt(string key)
+### `int getInt(string key)`
 Retrieves a previously stored integer.
 
-### double getDouble(string key)
+### `double getDouble(string key)`
 Retrieves a previously stored double.
 
-### object getObject(string key)
+### `object getObject(string key)`
 Retrieves a previously stored object.
 
-### dictionary getAll()
+### `dictionary getAll()`
 Retrieves all previously stored properties as a dictionary. The key you stored the property with will be its key in the dictionary.
 
-### void remove(string key)
+### `void remove(string key)`
 Removes a previously stored property permanently.
 
 
@@ -91,7 +91,7 @@ The value changed on the remote server. This can occur when another device syncs
 
 Receives a dictionary with the following keys:
 
-* string[] keys: Affected store keys.
+* keys (`[String]`): Affected store keys.
 
 ### needsInitialSync
 Local changes were discarded because an initial sync from the server has not yet happened. Initial syncs happen the
@@ -99,17 +99,26 @@ first time the device is synced but may also happen when user account settings c
 
 Receives a dictionary with the following keys:
 
-* string[] keys: Affected store keys.
+* keys (`[String]`): Affected store keys.
 
 ### quotaViolated
 The key-value store has exceeded its space quota on the server.
 
 Receives a dictionary with the following keys:
 
-* string[] keys: Affected store keys.
+* keys (`[String]`): Affected store keys.
+
+### accountChange
+The user has changed the primary iCloud account.
+The keys and values in the local key-value store have been replaced with those from the new account, regardless
+of the relative timestamps.
+
+Receives a dictionary with the following keys:
+
+* keys (`[String]`): Affected store keys.
 
 ## Usage
-See example.
+See `example/app.js`.
 
 ## Author
 Matthew Apperson, Hans Knöchel
