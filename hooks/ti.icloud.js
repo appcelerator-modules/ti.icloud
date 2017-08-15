@@ -23,24 +23,24 @@ function init(logger, config, cli, appc) {
 			var iCloudIdentifier = 'com.apple.iCloud';
 			var hash = data.args[0].hash;
 			var objects = hash.project.objects;
-			var rootObject = objects.rootObject;
-			var projectObject = objects[rootObject];
+			var rootObject = hash.project.rootObject;
+			var projectObject = objects['PBXProject'][rootObject];
 			var attributes = projectObject.attributes['TargetAttributes'];
-			var capabilities = attributes[0]['SystemCapabilities'];
+			var capabilities = attributes[Object.keys(attributes)[0]]['SystemCapabilities'];
 
 			// Loop through existing system-capabilities
-			for (var capability in capabilities) {
-				if (capability == iCloudIdentifier && capabilities[capability]['enabled'] == 0) {
+			Object.keys(capabilities).forEach(function(key) {
+				if (key == iCloudIdentifier && capabilities[key]['enabled'] == 0) {
 					logger.error('iCloud inside capabilities but disabled Skipping ...!');
 					return;
 				}
-			}
+			});
 
 			// Enabled the com.apple.iCloud capability
 			capabilities[iCloudIdentifier] = { enabled: 1 };
-
+			
 			// Re-assign the updated system capabilities
-			data.args[0].hash.project.objects[rootObject].attributes['TargetAttributes'][0]['SystemCapabilities'] = capabilities;
+			data.args[0].hash.project.objects['PBXProject'][rootObject].attributes['TargetAttributes'][Object.keys(attributes)[0]]['SystemCapabilities'] = capabilities;			
 		}
 	});
 }
