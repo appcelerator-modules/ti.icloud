@@ -5,8 +5,8 @@
 version: 2.0.0
 architectures: armv7 i386 x86_64 arm64
 description: Gives you access to storing simple key-value pairs in iCloud.
-author: Matthew Apperson
-license: Appcelerator Commercial License
+author: Matthew Apperson, Hans Knoechel
+license: Apache 2.0
 copyright: Copyright (c) 2010-Present by Axway Appcelerator
 
 
